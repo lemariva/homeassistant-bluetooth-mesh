@@ -1,7 +1,11 @@
-FROM python:3.10-bullseye
+FROM balenalib/armv7hf-debian-python:3.10.10-sid-build
+RUN [ "cross-build-start" ]
 
 RUN apt-get -y update && apt-get -y upgrade && apt-get -y install \
     build-essential \
+    wget \
+    git \
+    libglib2.0-dev \
     python3-docutils \
     udev \
     systemd \
@@ -11,28 +15,39 @@ RUN apt-get -y update && apt-get -y upgrade && apt-get -y install \
     libdbus-1-dev \
     libudev-dev \
     libical-dev \
-    libreadline-dev
+    libreadline-dev \
+    libssl-dev \
+    libusb-dev \
+    libffi-dev \
+    autoconf \
+    automake
 
-RUN apt-get -y install libell-dev bluez bluez-meshd
+# install BlueZ with mesh support
+WORKDIR /opt/build
+COPY ./docker/scripts/install-ell.sh .
+RUN sh ./install-ell.sh
 
 WORKDIR /opt/build
-COPY docker/scripts/install-json-c.sh .
+COPY ./docker/scripts/install-json-c.sh .
 RUN sh ./install-json-c.sh
+
+WORKDIR /opt/build
+COPY ./docker/scripts/install-bluez.sh .
+RUN sh ./install-bluez.sh
 
 # install bridge
 WORKDIR /opt/hass-ble-mesh
-COPY ./requirements.txt .
+RUN git clone https://github.com/louisjennings/homeassistant-bluetooth-mesh.git .
+RUN git checkout light-hsl
 RUN pip3 install -r requirements.txt
 
-WORKDIR /opt/hass-ble-mesh
-COPY ./gateway gateway
-
 # mount config
-WORKDIR /var/lib/bluetooth/mesh
-VOLUME /var/lib/bluetooth/mesh
-ENV GATEWAY_BASEDIR=/var/lib/bluetooth/mesh
+WORKDIR /config
+VOLUME /config
 
 # run bluetooth service and bridge
 WORKDIR /opt/hass-ble-mesh/gateway
-COPY docker/scripts/entrypoint.sh .
+COPY ./docker/scripts/entrypoint.sh .
 ENTRYPOINT [ "/bin/bash", "entrypoint.sh" ]
+
+RUN [ "cross-build-end" ]

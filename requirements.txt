@@ -1,7 +1,7 @@
 asyncio-mqtt==0.12.1
 bitstring==3.1.9
 black==22.10.0
-git+https://github.com/dominikberse/python-bluetooth-mesh@bac0c43553b23a8e68897a8d36a6f06c8cade684
+bluetooth-mesh==0.8.4
 cffi==1.15.1
 construct==2.9.45
 crc==0.3.0
@@ -18,7 +18,7 @@ prompt-toolkit==2.0.10
 pycparser==2.21
 pymesh==1.0.2
 pyparsing==3.0.9
-PyYAML==6.0
+PyYAML==6.0.1
 six==1.16.0
 typing-extensions==4.3.0
 wcwidth==0.2.5

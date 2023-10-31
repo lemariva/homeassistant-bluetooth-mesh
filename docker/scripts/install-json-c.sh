@@ -14,5 +14,5 @@ cd json-c-build/
 cmake -DCMAKE_INSTALL_PREFIX=/usr -DBUILD_STATIC_LIBS=OFF ..
 
 # build and install
-make
-make install
+make -j4
+make -j4 install
