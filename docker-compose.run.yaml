@@ -4,8 +4,14 @@ services:
     image: lemariva/homeassistant-bluetooth-mesh-app
     volumes:
       - ./docker/config:/var/lib/bluetooth/mesh
+      - /var/run/dbus/:/var/run/dbus/:z
     restart: "always"
     network_mode: "host"
     privileged: true
     tty: true
-
+    devices:
+      - /dev/ttyAMA0:/dev/ttyAMA0
+      - /dev/vcio:/dev/vcio
+    cap_add:
+      - NET_ADMIN
+      

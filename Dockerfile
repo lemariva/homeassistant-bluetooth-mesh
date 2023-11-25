@@ -1,4 +1,4 @@
-FROM balenalib/armv7hf-debian-python:3.10.10-sid-build
+FROM balenalib/raspberrypi3-python:3.10-sid
 RUN [ "cross-build-start" ]
 
 RUN apt-get -y update && apt-get -y upgrade && apt-get -y install \
@@ -7,11 +7,15 @@ RUN apt-get -y update && apt-get -y upgrade && apt-get -y install \
     git \
     libglib2.0-dev \
     python3-docutils \
+    python3-dev \
+    cargo \ 
+    pkg-config \
     udev \
     systemd \
     cmake \
     autoconf \
     libtool \
+    dbus \
     libdbus-1-dev \
     libudev-dev \
     libical-dev \
@@ -20,7 +24,10 @@ RUN apt-get -y update && apt-get -y upgrade && apt-get -y install \
     libusb-dev \
     libffi-dev \
     autoconf \
-    automake
+    automake \
+    libbluetooth-dev \
+    libreadline-dev
+
 
 # install BlueZ with mesh support
 WORKDIR /opt/build
@@ -37,9 +44,9 @@ RUN sh ./install-bluez.sh
 
 # install bridge
 WORKDIR /opt/hass-ble-mesh
-RUN git clone https://github.com/louisjennings/homeassistant-bluetooth-mesh.git .
-RUN git checkout light-hsl
-RUN pip3 install -r requirements.txt
+COPY ./gateway/* .
+COPY ./requirements.txt .
+RUN pip3 install -r requirements.txt 
 
 # mount config
 WORKDIR /config
@@ -48,6 +55,8 @@ VOLUME /config
 # run bluetooth service and bridge
 WORKDIR /opt/hass-ble-mesh/gateway
 COPY ./docker/scripts/entrypoint.sh .
+
+
 ENTRYPOINT [ "/bin/bash", "entrypoint.sh" ]
 
 RUN [ "cross-build-end" ]

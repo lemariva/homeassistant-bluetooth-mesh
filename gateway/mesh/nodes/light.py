@@ -46,6 +46,14 @@ class Light(Generic):
         logging.debug(f"Supports: {self._features}")
         return property in self._features
 
+    def lightness_cb(self, source: int,
+            net_index: int,
+            destination,
+            message):
+        if (self.unicast == source):
+            self.notify("availability", "online")
+            self.notify(Light.BrightnessProperty, message["light_lightness_status"]["present_lightness"])
+
     async def turn_on(self, ack=False):
         if not ack:
             await self.set_onoff_unack(True)
@@ -112,6 +120,11 @@ class Light(Generic):
         if await self.bind_model(models.LightHSLServer):
             self._features.add(Light.HueProperty)
             self._features.add(Light.SaturationProperty)
+
+        client = self._app.elements[0][models.LightLightnessClient]
+        client.app_message_callbacks[LightLightnessOpcode.LIGHT_LIGHTNESS_STATUS] \
+            .add(self.lightness_cb)
+
 
     async def set_onoff_unack(self, onoff, **kwargs):
         self.notify(Light.OnOffProperty, onoff)
